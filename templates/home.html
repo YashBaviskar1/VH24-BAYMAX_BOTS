@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Home - Fashion Portal</title>
 </head>
 <body>
-    <h1>Welcome to the Home Page!</h1>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}">
-    <p>You can sign up or log in using the buttons below:</p>
-    <button onclick="window.location.href='/signup'">Sign Up</button>
-    <button onclick="window.location.href='/login'">Login</button>
+    <div class="container">
+        <div class="image-side"></div>
+        <div class="wrapper">
+            <img src="images/logo.png" alt="Logo" class="logo">
+            <h1>Welcome to BayMax Bots</h1>
+            <div class="btn-container">
+                <button onclick="location.href='{{ url_for('signup') }}'" class="action-btn">Sign Up</button>
+                <button onclick="location.href='{{ url_for('login') }}'" class="action-btn">Login</button>
+                <a href="{{ url_for('google.login') }}" class="action-btn">Login with Google</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
