@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
+
+/* Root color variables for consistent theming */
+:root {
+  --accent-color: #AD8153;
+  --base-color: #D0D0D2;
+  --text-color: #2E2B41;
+  --input-color: #F3F0FF;
+}
+
+/* Reset and general styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+body {
+  min-height: 100vh;
+  background-image: url('background.jpg');
+  background-size: cover;
+  background-position: right;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Container for all pages */
+.container {
+  display: flex;
+  width: 90%;
+  max-width: 1200px;
+  min-height: 90vh;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Image section on the left */
+.image-side {
+  flex: 1;
+  background-image: url('images/signup3.png'); /* Replace with correct path */
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px 0 0 20px;
+}
+
+/* Wrapper for forms and home content */
+.wrapper {
+  flex: 1;
+  background-color: var(--base-color);
+  padding: 3rem;
+  border-radius: 0 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 150px;
+}
+
+h1, h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+p {
+  font-size: 1rem;
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+}
+
+/* Button container for the home page */
+.btn-container {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.action-btn {
+  padding: 0.85em 3em;
+  background-color: var(--accent-color);
+  color: var(--base-color);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-btn:hover {
+  background-color: var(--text-color);
+}
+
+/* Form styles for Login and Signup pages */
+form {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form label {
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+form input {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 2px solid var(--input-color);
+  background-color: var(--input-color);
+  transition: border-color 0.3s ease;
+}
+
+form input:focus {
+  outline: none;
+  border-color: var(--text-color);
+}
+
+form button {
+  padding: 0.8rem;
+  background-color: var(--accent-color);
+  color: var(--base-color);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: var(--text-color);
+}
+
+/* Link for navigation between login and signup */
+form a {
+  text-decoration: none;
+  color: var(--accent-color);
+  transition: color 0.3s ease;
+}
+
+form a:hover {
+  text-decoration: underline;
+  color: var(--text-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    width: 95%;
+    border-radius: 20px;
+  }
+
+  .image-side {
+    height: 250px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .wrapper {
+    padding: 2rem;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .logo {
+    position: static;
+    margin-bottom: 1rem;
+  }
+}
