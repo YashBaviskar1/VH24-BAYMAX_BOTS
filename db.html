@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">-- Create the database</p>
+<p class="p1">CREATE DATABASE auth_service;</p>
+<p class="p2"><br></p>
+<p class="p1">-- Use the newly created database</p>
+<p class="p1">USE auth_service;</p>
+<p class="p2"><br></p>
+<p class="p1">-- Create a table for storing user credentials</p>
+<p class="p1">CREATE TABLE users (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id INT AUTO_INCREMENT PRIMARY KEY,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>username VARCHAR(50) NOT NULL UNIQUE,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>password_hash VARCHAR(255) NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>salt VARCHAR(255) NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>email VARCHAR(100) NOT NULL UNIQUE,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p1">-- Create a table for storing password reset tokens (optional)</p>
+<p class="p1">CREATE TABLE password_resets (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id INT AUTO_INCREMENT PRIMARY KEY,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>email VARCHAR(100) NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>token VARCHAR(255) NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>expires_at TIMESTAMP NOT NULL</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p1">-- Create a table for tracking user sessions (optional)</p>
+<p class="p1">CREATE TABLE sessions (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id INT AUTO_INCREMENT PRIMARY KEY,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user_id INT NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>session_token VARCHAR(255) NOT NULL UNIQUE,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>expires_at TIMESTAMP NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>FOREIGN KEY (user_id) REFERENCES users(id)</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1">ALTER TABLE users DROP COLUMN password;</p>
+<p class="p2"><br></p>
+<p class="p1">ALTER TABLE users MODIFY email varchar(100) NULL;</p>
+<p class="p2"><br></p>
+<p class="p1">ALTER TABLE users MODIFY email varchar(100) DEFAULT '';</p>
+</body>
+</html>
