@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, session
 from flask_mail import Mail, Message
 from flask_session import Session
+from authlib.integrations.flask_client import OAuth
 import random 
 import pymysql, hashlib
 from datetime import datetime
@@ -23,6 +24,17 @@ cursor = connection.cursor()
 
 app = Flask(__name__)
 mail= Mail(app)
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id='663123264011-0v8pcfogbmbbj700g6gmv09hdc74nsee.apps.googleusercontent.com',
+    client_secret='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',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params=None,
+    redirect_uri='http://127.0.0.1:5000/oauth2callback',  
+    client_kwargs={'scope': 'openid email profile'}
+)
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -64,8 +76,8 @@ def log_request():
     print(f"Operating System: {os_name} {os_version}")
 
 
-#otp = generate_random_otp()
-otp = 123456
+otp = generate_random_otp()
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -92,7 +104,7 @@ def registration():
                       sender=app.config['MAIL_USERNAME'], 
                       recipients=[email])  
         msg.body = message_body
-        #mail.send(msg)
+        mail.send(msg)
         cursor.execute("INSERT INTO users (username, password_hash, email, salt) VALUES (%s, %s, %s, %s)", (username, password_hash, email, salt))
         connection.commit()
         client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
@@ -125,7 +137,17 @@ def authenticate():
             return redirect(url_for('login'))
     return render_template('authenticate.html')
 
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('authorize', _external=True)
+    return google.authorize_redirect(redirect_uri)
 
+@app.route('/oauth2callback')
+def authorize():
+    token = google.authorize_access_token() 
+    user_info = google.get('userinfo').json()  
+    session['profile'] = user_info  
+    return f'Hello, {user_info["name"]}! You are signed in with Google.'
 
 @app.route('/frontpage')
 def frontpage():
@@ -206,5 +228,8 @@ def metrics():
                            user_agent=user_agent_str,
                            browser=f"{browser_name} {browser_version}",
                            os=f"{os_name} {os_version}")
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
