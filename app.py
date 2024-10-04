@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, redirect
 from flask_mail import Mail, Message
 import random 
 
@@ -25,9 +24,12 @@ def generate_random_otp():
     print(otp_sent_to_mail)
     return otp_sent_to_mail
 
-generate_random_otp()
 
-
+#otp = generate_random_otp()
+otp = 123456
+@app.route('/')
+def home():
+    return render_template('home.html')
 @app.route('/registration', methods = ['GET', 'POST'])
 def registration():
     if request.method == 'POST' :
@@ -35,54 +37,36 @@ def registration():
         email = request.form['email']
         password = request.form['password']
         print(username, email, password)
-        otp = generate_random_otp()
-        otp = generate_random_otp()
+        
         message_body = f"Your OTP to register is {otp}."
         msg = Message(subject='Your OTP for Registration', 
                       sender=app.config['MAIL_USERNAME'], 
-                      recipients=[email])  # Send the OTP to the user's email
+                      recipients=[email])  
         msg.body = message_body
-        mail.send(msg)
-        return"Email sent successfuly"
+        #mail.send(msg)
+        return redirect(url_for('authenticate'))
 
 
     return render_template("reg.html")
 
-if __name__ == '__main__':
-    app.run(debug=True)
-=======
-from flask import Flask, render_template, request, redirect, url_for
-
-app = Flask(__name__)
-
-# Mock database (use a real database in production)
-users = {}
-
-@app.route('/')
-def home():
-    return render_template('home.html')
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
+@app.route('/authenticate', methods = ['POST', 'GET'])
+def authenticate():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username in users:
-            return "User already exists!"
-        users[username] = password
-        return redirect(url_for('login'))
-    return render_template('signup.html')
+        user_otp = request.form['otp']
+        if user_otp != str(otp) :
+            return "InValid OTP Please try again"
+        else :
+            return redirect(url_for('frontpage'))
+    return render_template('authenticate.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username in users and users[username] == password:
-            return redirect(url_for('home'))
-        return "Invalid credentials!"
-    return render_template('login.html')
+
+
+@app.route('/frontpage')
+def frontpage():
+    return render_template("frontpage.html")
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
->>>>>>> 270a8b403e14367e42e679f81b319b24ff36ccec
