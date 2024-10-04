@@ -1,9 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for
+import pymysql
+import hashlib
+import os
 
 app = Flask(__name__)
 
-# Mock database (use a real database in production)
-users = {}
+# Database connection
+connection = pymysql.connect(
+    host='localhost',
+    user='root',
+    password='29092004',
+    database='auth_service'
+)
+cursor = connection.cursor()
 
 @app.route('/')
 def home():
@@ -14,9 +23,15 @@ def signup():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username in users:
+        salt = os.urandom(16).hex()  # Generate a random salt
+        password_hash = hashlib.sha256((salt + password).encode()).hexdigest()  # Hash the password with salt
+        
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        if cursor.fetchone():
             return "User already exists!"
-        users[username] = password
+        
+        cursor.execute("INSERT INTO users (username, password_hash, salt) VALUES (%s, %s, %s)", (username, password_hash, salt))
+        connection.commit()
         return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -25,8 +40,16 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username in users and users[username] == password:
-            return redirect(url_for('home'))
+        
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        if user:
+            # Hash the entered password with the stored salt
+            stored_salt = user[3]  # Assuming the salt is the fourth column
+            password_hash = hashlib.sha256((stored_salt + password).encode()).hexdigest()
+            
+            if user[2] == password_hash:  # Check against stored password_hash
+                return redirect(url_for('home'))
         return "Invalid credentials!"
     return render_template('login.html')
 
