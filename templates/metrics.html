@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Frontpage</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Metrics captured during session</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <!-- Logout Button -->
+                <li class="nav-item">
+                    <!-- <button class="btn btn-outline-danger" href="/logout" onclick="logout()">Logout</a> -->
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <h1 class="text-center">Metrics of your session</h1>
+        <!-- <h2 id="username" class="text-center">Logged in as: {{ session['username'] }}</h2> -->
+        <!-- <h3 id="session-time" class="text-center">Session Time: {{ elapsed_time}}</h3> -->
+        <p class="text-center"></p>
+
+        <!-- Display Logging Metrics -->
+        <div class="metrics">
+            <h4 class="text-center">Request Metrics:</h4>
+            <ul class="list-group">
+                <!-- <li class="list-group-item">Logged in : {{ session['username'] }}</li> -->
+                <li class="list-group-item">Session Time: {{ elapsed_time }}</li>
+                <li class="list-group-item">Timestamp: {{ timestamp }}</li>
+                <li class="list-group-item">IP Address: {{ client_ip }}</li>
+                <li class="list-group-item">Request Method: {{ request_method }}</li>
+                <li class="list-group-item">Request URL: {{ request_url }}</li>
+                <li class="list-group-item">Request Path: {{ request_path }}</li>
+                <li class="list-group-item">User Agent: {{ user_agent }}</li>
+                <li class="list-group-item">Browser: {{ browser }}</li>
+                <li class="list-group-item">Operating System: {{ os }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (optional, for responsive toggler) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
