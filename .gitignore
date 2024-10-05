@@ -1,2 +1,5 @@
 env/
 __pychache__/
+cleaned_40k.csv
+model_pipeline_ls.pkl
+model_pipeline_ls.pkl

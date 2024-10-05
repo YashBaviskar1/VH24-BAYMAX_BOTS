@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Logger</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+        #sidebar {
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 200px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+        }
+        #sidebar a {
+            color: white;
+            padding: 15px;
+            display: block;
+            text-decoration: none;
+        }
+        #sidebar a:hover {
+            background-color: #007bff;
+        }
+        #content {
+            margin-left: 210px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3 class="text-center">Dashboard</h3>
+        <a href="#" onclick="loadContent('user_session_analytics')">User Session Analytics</a>
+        <a href="#" onclick="loadContent('ip_logger')">IP Logger</a>
+        <a href="#" onclick="loadContent('suspicious_activity')">Suspicious Activity</a>
+        <a href="#" onclick="loadContent('settings')">Settings</a>
+    </div>
+
+    <div id="content">
+        <div id="main-content">
+            <h2>IP Logger</h2>
+            <p>Details of logged IP addresses will be displayed here.</p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Timestamp</th>
+                        <th scope="col">IP Address</th>
+                        <th scope="col">User Agent</th>
+                        <th scope="col">Request Method</th>
+                        <th scope="col">Request URL</th>
+                    </tr>
+                </thead>
+                <tbody id="ip-logger-table">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <div id="graphs"></div>
+    </div>
+
+    <script>
+        function loadContent(option) {
+            const contentDiv = document.getElementById('main-content');
+            contentDiv.innerHTML = '';
+            
+            if (option === 'user_session_analytics') {
+                contentDiv.innerHTML = `
+                    <h3>User Session Analytics</h3>
+                    <button onclick="fetchGraph('attack_os')" class="btn btn-primary">Attack IPs by OS</button>
+                    <button onclick="fetchGraph('attack_browser')" class="btn btn-primary">Attack IPs by Browser</button>
+                    <button onclick="fetchGraph('attack_country')" class="btn btn-primary">Attack IPs by Country</button>
+                    <button onclick="fetchGraph('login_correlation')" class="btn btn-primary">Device Type and Browser Type</button>
+                    <button onclick="fetchGraph('mobile_login_success')" class="btn btn-primary">Login Success Rate for Mobile Devices</button>
+                `;
+            } else if (option === 'ip_logger') {
+                loadIPLoggerContent();
+            } else if (option === 'suspicious_activity') {
+                contentDiv.innerHTML = `
+                    <h3>Suspicious Activity</h3>
+                    <p>Suspicious activity details will be shown here...</p>
+                `;
+            } else if (option === 'settings') {
+                contentDiv.innerHTML = `
+                    <h3>Settings</h3>
+                    <p>Settings options...</p>
+                `;
+            }
+        }
+
+        function loadIPLoggerContent() {
+            const contentDiv = document.getElementById('main-content');
+            contentDiv.innerHTML = `
+                <h2>IP Logger</h2>
+                <p>Details of logged IP addresses will be displayed here.</p>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col">IP Address</th>
+                            <th scope="col">User Agent</th>
+                            <th scope="col">Request Method</th>
+                            <th scope="col">Request URL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ip-logger-table">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            `;
+            fetchIPLoggerData();
+        }
+
+        function fetchIPLoggerData() {
+            fetch('/api/ip_logger') // Adjust the API endpoint accordingly
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('ip-logger-table');
+                    tableBody.innerHTML = ''; // Clear the table
+                    data.forEach(entry => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${entry.timestamp}</td>
+                            <td>${entry.ip_address}</td>
+                            <td>${entry.user_agent}</td>
+                            <td>${entry.request_method}</td>
+                            <td>${entry.request_url}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching IP logger data:', error));
+        }
+
+        function fetchGraph(graphType) {
+            fetch(`/graph/${graphType}`)
+                .then(response => response.json())
+                .then(data => {
+                    const graphsDiv = document.getElementById('graphs');
+                    graphsDiv.innerHTML = '';
+
+                    const plotDiv = document.createElement('div');
+                    plotDiv.id = 'plotDiv';
+                    graphsDiv.appendChild(plotDiv);
+
+                    Plotly.newPlot('plotDiv', data.data, data.layout);
+                })
+                .catch(error => console.error('Error fetching graph:', error));
+        }
+
+        loadContent('ip_logger');
+    </script>
+</body>
+</html>
