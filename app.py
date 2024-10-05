@@ -8,6 +8,9 @@ from datetime import datetime
 import os 
 from user_agents import parse
 from time import time 
+from datetime import datetime, timedelta
+from flask_sqlalchemy import SQLAlchemy
+
 # Flask-Mail for email-based OTP 
 
 # using random to generate 6 digits random code 
@@ -22,18 +25,21 @@ connection = pymysql.connect(
 )
 cursor = connection.cursor()
 
+
 app = Flask(__name__)
 mail= Mail(app)
 oauth = OAuth(app)
+
 google = oauth.register(
     name='google',
-    client_id='WHATT',
-    client_secret= 'WHATT',
+    client_id='663123264011-0v8pcfogbmbbj700g6gmv09hdc74nsee.apps.googleusercontent.com',
+    client_secret= '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',
     access_token_url='https://accounts.google.com/o/oauth2/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     authorize_params=None,
     redirect_uri='http://127.0.0.1:5000/oauth2callback',  
-    client_kwargs={'scope': 'openid email profile'}
+    client_kwargs={'scope': 'openid email profile'},
+    server_metadata_url= 'https://accounts.google.com/.well-known/openid-configuration'
 )
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -44,6 +50,19 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['SECRET_KEY'] = 'key'
 app.config['SESSION_TYPE'] = 'filesystem' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///logs.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+MAX_ATTEMPTS = 5
+BLOCK_TIME =  timedelta(minutes=15)
+user_attemps = 0
+# def login_attempts(user):
+#     failed_login = 0
+#     if failed_login >= MAX_ATTEMPTS:
+#         return False
+#     else : 
+#         return True
 mail = Mail(app)
 def generate_random_otp():
     otp_sent_to_mail = random.randint(100000, 999999)
@@ -62,10 +81,20 @@ def log_request():
     browser_version = user_agent.browser.version_string
     os_name = user_agent.os.family  
     os_version = user_agent.os.version_string
-    
     timestamp = datetime.now().isoformat()
 
-
+    log_entry = LogEntry(
+        timestamp=timestamp,
+        client_ip=client_ip,
+        request_method=request_method,
+        request_url=request_url,
+        request_path=request_path,
+        user_agent=user_agent_str,
+        browser_name=browser_name,
+        browser_version=browser_version,
+        os_name=os_name,
+        os_version=os_version
+    )
     print(f"Timestamp: {timestamp}")
     print(f"IP Address: {client_ip}")
     print(f"Request Method: {request_method}")
@@ -74,9 +103,30 @@ def log_request():
     print(f"User Agent: {user_agent_str}")
     print(f"Browser: {browser_name} {browser_version}")
     print(f"Operating System: {os_name} {os_version}")
-
+    try:
+        db.session.add(log_entry)
+        db.session.commit()
+        print("Log entry added successfully.")
+    except Exception as e:
+        print(f"Error adding log entry: {e}")
 
 otp = generate_random_otp()
+class LogEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.String(100))
+    client_ip = db.Column(db.String(100))
+    request_method = db.Column(db.String(10))
+    request_url = db.Column(db.String(200))
+    request_path = db.Column(db.String(200))
+    user_agent = db.Column(db.String(200))
+    browser_name = db.Column(db.String(100))
+    browser_version = db.Column(db.String(100))
+    os_name = db.Column(db.String(100))
+    os_version = db.Column(db.String(100))
+    def __repr__(self):
+        return f'<Log {self.id}>'
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def home():
@@ -144,6 +194,7 @@ def google_login():
 
 @app.route('/oauth2callback')
 def authorize():
+    google = oauth.create_client('google')
     token = google.authorize_access_token() 
     user_info = google.get('userinfo').json()  
     session['profile'] = user_info  
@@ -181,10 +232,24 @@ def login():
                     session['username'] = username 
                     return redirect(url_for('frontpage'))
                 else:
+                    user_attemps = user_attemps + 1
+                    print(f"User attempts : {user_attemps}")
                     flash("Wrong Password!", "error")
+                    if user_attemps >= MAX_ATTEMPTS:
+
+                        return redirect(url_for('blockpage'))
+
                     return redirect(url_for('login'))
+
             else:
                 flash("Username does not exist!", "error")
+#                 MAX_ATTEMPTS = 5
+# BLOCK_TIME =  timedelta(minutes=15)
+# user_attempt = 0
+                user_attemps = user_attemps + 1
+                print(f"User attempts : {user_attemps}")
+                if user_attemps >= MAX_ATTEMPTS:
+                    return redirect(url_for('blockpage'))
                 return redirect(url_for('login'))
 
         except Exception as e:
@@ -229,7 +294,9 @@ def metrics():
                            browser=f"{browser_name} {browser_version}",
                            os=f"{os_name} {os_version}")
 
-
+@app.route('/blockpage')
+def blockpage():
+    return render_template("blockpage.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
